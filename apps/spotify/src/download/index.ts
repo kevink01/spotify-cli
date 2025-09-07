@@ -3,6 +3,7 @@ import { getLikedSongs } from '~/actions/likedSongs';
 import { getSavedAlbums } from '~/actions/savedAlbums';
 import { getSavedArtists } from '~/actions/savedArtists';
 import { getSavedAudiobooks } from '~/actions/savedAudiobooks';
+import { getSavedEpisodes } from '~/actions/savedEpisodes';
 import { statusBars } from '~/index';
 
 export async function handleDownloadOptions(access_token: string) {
@@ -60,6 +61,7 @@ export async function handleDownloadOptions(access_token: string) {
 				await getSavedAudiobooks(access_token, num);
 				break;
 			case 'saved_episodes':
+				await getSavedEpisodes(access_token, num);
 				break;
 			case 'owned_playlists':
 				break;
