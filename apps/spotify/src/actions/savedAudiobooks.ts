@@ -60,10 +60,10 @@ export async function getSavedAudiobooks(access_token: string, index: number) {
 
 async function getAllAudiobooks(
 	start: number,
-	totalArtists: number,
+	totalAudiobooks: number,
 	access_token: string
 ): Promise<any[]> {
-	if (start > totalArtists) return [];
+	if (start > totalAudiobooks) return [];
 	const savedAudiobooksURL = getURL(AUDIOBOOKS_URL, start, DEFAULT_OFFSET);
 	return await fetch(savedAudiobooksURL, {
 		headers: {
@@ -84,7 +84,7 @@ async function getAllAudiobooks(
 				...items,
 				...(await getAllAudiobooks(
 					start + DEFAULT_OFFSET,
-					totalArtists,
+					totalAudiobooks,
 					access_token
 				)),
 			];
