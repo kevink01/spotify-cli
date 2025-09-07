@@ -2,6 +2,7 @@ import { checkbox } from '@inquirer/prompts';
 import { getLikedSongs } from '~/actions/likedSongs';
 import { getSavedAlbums } from '~/actions/savedAlbums';
 import { getSavedArtists } from '~/actions/savedArtists';
+import { getSavedAudiobooks } from '~/actions/savedAudiobooks';
 import { statusBars } from '~/index';
 
 export async function handleDownloadOptions(access_token: string) {
@@ -54,18 +55,27 @@ export async function handleDownloadOptions(access_token: string) {
 		switch (answer) {
 			case 'saved_albums':
 				await getSavedAlbums(access_token, num);
-				await statusBars.step(totalStatusBar, 1);
 				break;
-			case 'saved_artists':
-				await getSavedArtists(access_token, num);
-				await statusBars.step(totalStatusBar, 1);
+			case 'saved_audiobooks':
+				await getSavedAudiobooks(access_token, num);
+				break;
+			case 'saved_episodes':
+				break;
+			case 'owned_playlists':
+				break;
+			case 'followed_playlists':
+				break;
+			case 'saved_shows':
 				break;
 			case 'liked':
 				await getLikedSongs(access_token, num);
-				await statusBars.step(totalStatusBar, 1);
+				break;
+			case 'saved_artists':
+				await getSavedArtists(access_token, num);
 				break;
 			default:
 		}
+		await statusBars.step(totalStatusBar, 1);
 	}
 	await statusBars.stop(totalStatusBar);
 	statusBars.stopAll();

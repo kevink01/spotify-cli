@@ -22,9 +22,10 @@ const customFormatter: GenericFormatter = (
 		progress,
 		params.maxWidth
 	);
-	const percentage = `${(params.progress * 100).toFixed(2)}%`.padStart(6);
+	const percentage = `${(params.progress * 100).toFixed(2)}%`.padStart(7);
 	const totalStr = `${params.value}/${params.total}`.padStart(10);
-	return `${chalk.green(completeBar + '' + incompleteBar)} | ${payload.name} | ${percentage} | ETA: ${params.eta}s | ${totalStr} | ${payload.status}`;
+	const etaStr = `${isNaN(params.eta) ? 0 : params.eta}`.padStart(3);
+	return `${chalk.green(completeBar + '' + incompleteBar)} | ${payload.name} | ${percentage} | ETA: ${etaStr}s | ${totalStr} | ${payload.status}`;
 };
 
 const customPreset: Preset = {
@@ -47,7 +48,7 @@ export class StatusBar {
 
 	createSingleBar(name: string, total: number, start: number): SingleBar {
 		return this.statusBars.create(total, start, {
-			name: name.padEnd(15),
+			name: name.padEnd(20),
 			status: this.getStatus('pending'),
 		});
 	}
@@ -55,7 +56,7 @@ export class StatusBar {
 	async step(bar: SingleBar | null, step: number) {
 		this.assertStatusBarIsNotNull(bar);
 		await this.asyncProgress(() => {
-			bar.increment(step, { status: this.getStatus('pending') });
+			bar.increment(step);
 		});
 	}
 
