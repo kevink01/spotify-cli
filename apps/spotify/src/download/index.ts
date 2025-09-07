@@ -4,6 +4,7 @@ import { getSavedAlbums } from '~/actions/savedAlbums';
 import { getSavedArtists } from '~/actions/savedArtists';
 import { getSavedAudiobooks } from '~/actions/savedAudiobooks';
 import { getSavedEpisodes } from '~/actions/savedEpisodes';
+import { getSavedPlaylists } from '~/actions/savedPlaylists';
 import { getSavedShows } from '~/actions/savedShows';
 import { statusBars } from '~/index';
 
@@ -65,6 +66,7 @@ export async function handleDownloadOptions(access_token: string) {
 				await getSavedEpisodes(access_token, num);
 				break;
 			case 'owned_playlists':
+				await getSavedPlaylists(access_token, num);
 				break;
 			case 'followed_playlists':
 				break;

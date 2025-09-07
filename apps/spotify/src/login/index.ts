@@ -27,8 +27,15 @@ const codeVerifier = generateRandomString(64);
 const hashed = await sha256(codeVerifier);
 const codeChallenge = base64encode(hashed);
 
-const scope =
-	'user-read-private user-read-email user-library-read user-follow-read user-read-playback-position';
+const scope = [
+	'playlist-read-collaborative',
+	'playlist-read-private',
+	'user-follow-read',
+	'user-library-read',
+	'user-read-email',
+	'user-read-playback-position',
+	'user-read-private',
+].join(' ');
 const authOptions = new URLSearchParams({
 	response_type: 'code',
 	client_id: SPOTIFY_CLIENT_ID,
