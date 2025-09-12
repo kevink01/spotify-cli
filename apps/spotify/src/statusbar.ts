@@ -14,13 +14,11 @@ const customFormatter: GenericFormatter = (
 	params: Params,
 	payload: any
 ) => {
-	const progress = Math.round(
-		params.progress * (params.maxWidth / 100) * (options.barsize ?? 40)
-	);
+	const progress = Math.floor(params.progress * (options.barsize ?? 40));
 	const completeBar = options.barCompleteString?.substring(0, progress);
 	const incompleteBar = options.barIncompleteString?.substring(
 		progress,
-		params.maxWidth
+		options.barsize ?? 40
 	);
 	const percentage = `${(params.progress * 100).toFixed(2)}%`.padStart(7);
 	const totalStr = `${params.value}/${params.total}`.padStart(10);
