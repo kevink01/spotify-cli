@@ -1,5 +1,5 @@
 import type { SingleBar } from 'cli-progress';
-import { logger, statusBars } from '..';
+import { logger, statusBars } from '../..';
 import {
 	PLAYLISTS_URL,
 	DEFAULT_OFFSET,

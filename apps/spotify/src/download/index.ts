@@ -1,28 +1,24 @@
 import { checkbox } from '@inquirer/prompts';
-import { getLikedSongs } from '~/actions/likedSongs';
-import { getSavedAlbums } from '~/actions/savedAlbums';
 import { getSavedArtists } from '~/actions/savedArtists';
-import { getSavedAudiobooks } from '~/actions/savedAudiobooks';
-import { getSavedEpisodes } from '~/actions/savedEpisodes';
 import { getSavedPlaylists } from '~/actions/savedPlaylists';
-import { getSavedShows } from '~/actions/savedShows';
 import { statusBars } from '~/index';
+import DownloadOptions from '../actions/download';
 
 export async function handleDownloadOptions(access_token: string) {
 	const answers = await checkbox({
 		message: 'Select which download options to conduct',
 		choices: [
 			{
-				name: 'Saved albums',
-				value: 'saved_albums',
+				name: DownloadOptions.getAlbumsOptions.name,
+				value: DownloadOptions.getAlbumsOptions.value,
 			},
 			{
-				name: 'Saved audiobooks',
-				value: 'saved_audiobooks',
+				name: DownloadOptions.getAudiobooksOptions.name,
+				value: DownloadOptions.getAudiobooksOptions.value,
 			},
 			{
-				name: 'Saved episodes',
-				value: 'saved_episodes',
+				name: DownloadOptions.getEpisodesOptions.name,
+				value: DownloadOptions.getEpisodesOptions.value,
 				description: 'Spotify API is in BETA mode',
 			},
 			{
@@ -30,16 +26,12 @@ export async function handleDownloadOptions(access_token: string) {
 				value: 'owned_playlists',
 			},
 			{
-				name: 'Followed playlsits',
-				value: 'followed_playlists',
+				name: DownloadOptions.getShowsOptions.name,
+				value: DownloadOptions.getShowsOptions.value,
 			},
 			{
-				name: 'Saved shows',
-				value: 'saved_shows',
-			},
-			{
-				name: 'Liked songs',
-				value: 'liked',
+				name: DownloadOptions.getLikedSongsOptions.name,
+				value: DownloadOptions.getLikedSongsOptions.value,
 			},
 			{
 				name: 'Saved artists',
@@ -56,25 +48,23 @@ export async function handleDownloadOptions(access_token: string) {
 		const answer = answers[index];
 		const num = index + 1;
 		switch (answer) {
-			case 'saved_albums':
-				await getSavedAlbums(access_token, num);
+			case DownloadOptions.getAlbumsOptions.value:
+				await DownloadOptions.getAlbumsOptions.process_data(access_token);
 				break;
-			case 'saved_audiobooks':
-				await getSavedAudiobooks(access_token, num);
+			case DownloadOptions.getAudiobooksOptions.value:
+				await DownloadOptions.getAudiobooksOptions.process_data(access_token);
 				break;
-			case 'saved_episodes':
-				await getSavedEpisodes(access_token, num);
+			case DownloadOptions.getEpisodesOptions.value:
+				await DownloadOptions.getEpisodesOptions.process_data(access_token);
 				break;
 			case 'owned_playlists':
 				await getSavedPlaylists(access_token, num);
 				break;
-			case 'followed_playlists':
+			case DownloadOptions.getShowsOptions.value:
+				await DownloadOptions.getShowsOptions.process_data(access_token);
 				break;
-			case 'saved_shows':
-				await getSavedShows(access_token, num);
-				break;
-			case 'liked':
-				await getLikedSongs(access_token, num);
+			case DownloadOptions.getLikedSongsOptions.value:
+				await DownloadOptions.getLikedSongsOptions.process_data(access_token);
 				break;
 			case 'saved_artists':
 				await getSavedArtists(access_token, num);

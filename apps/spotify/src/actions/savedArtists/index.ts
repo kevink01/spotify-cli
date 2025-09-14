@@ -1,5 +1,5 @@
 import type { SingleBar } from 'cli-progress';
-import { logger, statusBars } from '..';
+import { logger, statusBars } from '../..';
 import { ARTISTS_URL, DEFAULT_OFFSET } from '~/constants/spotify';
 import { writeFile } from 'fs/promises';
 
@@ -96,11 +96,11 @@ async function getAllArtists(
 
 function getArtistURL(limit: number, after?: string) {
 	const artistURL = new URL(ARTISTS_URL);
-	artistURL.search = getAlbumSearchParams(limit, after);
+	artistURL.search = getArtistSearchParams(limit, after);
 	return artistURL;
 }
 
-function getAlbumSearchParams(limit: number, after?: string) {
+function getArtistSearchParams(limit: number, after?: string) {
 	const params = new URLSearchParams({
 		limit: limit.toString(),
 		type: 'artist',
