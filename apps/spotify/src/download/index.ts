@@ -1,8 +1,17 @@
 import { checkbox } from '@inquirer/prompts';
-import { getSavedArtists } from '~/actions/savedArtists';
-import { getSavedPlaylists } from '~/actions/savedPlaylists';
 import { statusBars } from '~/index';
 import DownloadOptions from '../actions/download';
+import type { SingleBar } from 'cli-progress';
+
+let totalStatusBar: SingleBar | null = null;
+
+export function updateTotalStatusBar(progress: number = 1) {
+	statusBars.updateTotal(totalStatusBar, progress);
+}
+
+export function updateProgessTotalbar(step: number = 1) {
+	statusBars.step(totalStatusBar, step);
+}
 
 export async function handleDownloadOptions(access_token: string) {
 	const answers = await checkbox({
@@ -22,8 +31,8 @@ export async function handleDownloadOptions(access_token: string) {
 				description: 'Spotify API is in BETA mode',
 			},
 			{
-				name: 'Owned playlsits',
-				value: 'owned_playlists',
+				name: DownloadOptions.getPlaylistsOptions.name,
+				value: DownloadOptions.getPlaylistsOptions.value,
 			},
 			{
 				name: DownloadOptions.getShowsOptions.name,
@@ -34,19 +43,13 @@ export async function handleDownloadOptions(access_token: string) {
 				value: DownloadOptions.getLikedSongsOptions.value,
 			},
 			{
-				name: 'Saved artists',
-				value: 'saved_artists',
+				name: DownloadOptions.getArtistOptions.name,
+				value: DownloadOptions.getArtistOptions.value,
 			},
 		],
 	});
-	const totalStatusBar = statusBars.createSingleBar(
-		'Download',
-		answers.length,
-		0
-	);
-	for (let index = 0; index < answers.length; index++) {
-		const answer = answers[index];
-		const num = index + 1;
+	totalStatusBar = statusBars.createSingleBar('Download', answers.length, 0);
+	for (const answer of answers) {
 		switch (answer) {
 			case DownloadOptions.getAlbumsOptions.value:
 				await DownloadOptions.getAlbumsOptions.process_data(access_token);
@@ -57,8 +60,8 @@ export async function handleDownloadOptions(access_token: string) {
 			case DownloadOptions.getEpisodesOptions.value:
 				await DownloadOptions.getEpisodesOptions.process_data(access_token);
 				break;
-			case 'owned_playlists':
-				await getSavedPlaylists(access_token, num);
+			case DownloadOptions.getPlaylistsOptions.value:
+				await DownloadOptions.getPlaylistsOptions.process_data(access_token);
 				break;
 			case DownloadOptions.getShowsOptions.value:
 				await DownloadOptions.getShowsOptions.process_data(access_token);
@@ -66,8 +69,8 @@ export async function handleDownloadOptions(access_token: string) {
 			case DownloadOptions.getLikedSongsOptions.value:
 				await DownloadOptions.getLikedSongsOptions.process_data(access_token);
 				break;
-			case 'saved_artists':
-				await getSavedArtists(access_token, num);
+			case DownloadOptions.getArtistOptions.value:
+				await DownloadOptions.getArtistOptions.process_data(access_token);
 				break;
 			default:
 		}

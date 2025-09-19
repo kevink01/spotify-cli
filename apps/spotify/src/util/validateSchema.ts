@@ -9,7 +9,7 @@ export function validateSchema<T extends z.ZodType>(
 	const schemedResponse = [];
 	for (const item of data) {
 		schemedResponse.push({
-			added_at: options.included_added_at
+			added_at: options.include_added_at
 				? getKey(item, options, 'added_at')
 				: undefined,
 			href: getKey(item, options, 'href'),

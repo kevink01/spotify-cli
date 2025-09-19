@@ -10,8 +10,8 @@ export const getAlbumsOptions: Option = {
 	value: 'saved_albums',
 	key: 'album',
 	save_file: 'data/savedAlbums',
-	user_url: ALBUMS_URL,
-	included_added_at: false,
+	url: ALBUMS_URL,
+	include_added_at: false,
 	offset_error_message: 'Could not get information for albums with offset',
 	process_data: async (token: string) =>
 		await processData({

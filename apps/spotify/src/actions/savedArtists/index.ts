@@ -2,11 +2,22 @@ import type { SingleBar } from 'cli-progress';
 import { logger, statusBars } from '../..';
 import { ARTISTS_URL, DEFAULT_OFFSET } from '~/constants/spotify';
 import { writeFile } from 'fs/promises';
+import type { Option } from '~/util/option';
 
 let artistBar: SingleBar | null = null;
 
-export async function getSavedArtists(access_token: string, index: number) {
-	// logger.startMessage("Downloading user's saved artists", index);
+export const getArtistOptions: Option = {
+	name: 'Saved artists',
+	value: 'saved_artists',
+	key: '',
+	save_file: 'data/savedArtists',
+	url: ARTISTS_URL,
+	include_added_at: false,
+	offset_error_message: 'Could not get information for artists with offset',
+	process_data: async (token: string) => await getSavedArtists(token),
+};
+
+export async function getSavedArtists(access_token: string) {
 	const artistsCountURL = getArtistURL(1, undefined);
 	return await fetch(artistsCountURL, {
 		headers: {
@@ -15,11 +26,17 @@ export async function getSavedArtists(access_token: string, index: number) {
 	})
 		.then(async (res) => {
 			if (!res.ok) {
-				throw new Error('Error in saved artists');
+				throw new Error(
+					`Error getting the total count for ${getArtistOptions.name.toLowerCase()}`
+				);
 			}
 			const data = await res.json();
 			const totalArtists = data['artists']['total'] as number;
-			artistBar = statusBars.createSingleBar('Saved artists', totalArtists, 0);
+			artistBar = statusBars.createSingleBar(
+				getArtistOptions.name,
+				totalArtists,
+				0
+			);
 			const allArtists = await getAllArtists(
 				0,
 				totalArtists,
@@ -36,7 +53,7 @@ export async function getSavedArtists(access_token: string, index: number) {
 				});
 			}
 			await writeFile(
-				'data/savedArtists.json',
+				`${getArtistOptions.save_file}.json`,
 				JSON.stringify(schemedArtists, null, 4),
 				'utf-8'
 			);
@@ -69,9 +86,7 @@ async function getAllArtists(
 	})
 		.then(async (res): Promise<any[]> => {
 			if (!res.ok) {
-				throw new Error(
-					`Could not get information for artists with offset ${start}`
-				);
+				throw new Error(`${getArtistOptions.offset_error_message} ${start}`);
 			}
 			const data = await res.json();
 			const items = data['artists']['items'] as any[];
@@ -95,7 +110,7 @@ async function getAllArtists(
 }
 
 function getArtistURL(limit: number, after?: string) {
-	const artistURL = new URL(ARTISTS_URL);
+	const artistURL = new URL(getArtistOptions.url);
 	artistURL.search = getArtistSearchParams(limit, after);
 	return artistURL;
 }

@@ -10,8 +10,8 @@ export const getEpisodesOptions: Option = {
 	value: 'saved_episodes',
 	key: 'episode',
 	save_file: 'data/savedEpisodes',
-	user_url: EPISODES_URL,
-	included_added_at: true,
+	url: EPISODES_URL,
+	include_added_at: true,
 	offset_error_message: 'Could not get information for episodes with offset',
 	process_data: async (token: string) =>
 		await processData({

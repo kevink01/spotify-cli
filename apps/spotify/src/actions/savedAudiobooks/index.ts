@@ -9,8 +9,8 @@ export const getAudiobooksOptions: Option = {
 	value: 'saved_audiobooks',
 	key: undefined,
 	save_file: 'data/savedAudiobooks',
-	user_url: AUDIOBOOKS_URL,
-	included_added_at: false,
+	url: AUDIOBOOKS_URL,
+	include_added_at: false,
 	offset_error_message: 'Could not get information for audiobooks with offset',
 	process_data: async (token: string) =>
 		await processData({

@@ -10,8 +10,8 @@ export const getShowsOptions: Option = {
 	value: 'saved_shows',
 	key: 'show',
 	save_file: 'data/savedShows',
-	user_url: SHOWS_URL,
-	included_added_at: true,
+	url: SHOWS_URL,
+	include_added_at: true,
 	offset_error_message: 'Could not get information for shows with offset',
 	process_data: async (token: string) =>
 		await processData({

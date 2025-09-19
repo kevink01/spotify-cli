@@ -23,7 +23,7 @@ type ProcessDataArgs = {
 };
 
 export async function processData({ ...args }: ProcessDataArgs) {
-	const countURL = getURL(args.options.user_url, 0, 1);
+	const countURL = getURL(args.options.url, 0, 1);
 	return await fetch(countURL, {
 		headers: {
 			Authorization: `Bearer ${args.token}`,
@@ -69,7 +69,7 @@ async function getAllData(
 	{ ...args }: ProcessDataArgs
 ): Promise<any[]> {
 	if (start > total) return [];
-	const savedEpisodesURL = getURL(args.options.user_url, start, DEFAULT_OFFSET);
+	const savedEpisodesURL = getURL(args.options.url, start, DEFAULT_OFFSET);
 	return await fetch(savedEpisodesURL, {
 		headers: {
 			Authorization: `Bearer ${args.token}`,

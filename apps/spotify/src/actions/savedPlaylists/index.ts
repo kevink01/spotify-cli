@@ -4,16 +4,50 @@ import {
 	PLAYLISTS_URL,
 	DEFAULT_OFFSET,
 	getPlaylistTracksByIdURL,
+	USER_URL,
 } from '~/constants/spotify';
 import { writeFile } from 'fs/promises';
 import { getSearchParams, getURL } from '~/util/url';
+import { updateProgessTotalbar, updateTotalStatusBar } from '~/download';
+import type { Option } from '~/util/option';
 
 let playlistBar: SingleBar | null = null;
 let playlistTrackBar: SingleBar | null = null;
 
-export async function getSavedPlaylists(access_token: string, index: number) {
+export const getPlaylistsOptions: Option = {
+	name: 'Saved playlists',
+	value: 'saved_playlists',
+	key: '',
+	save_file: 'data/savedPlaylists',
+	url: PLAYLISTS_URL,
+	include_added_at: true,
+	offset_error_message: 'Could not get information for playlists with offset',
+	process_data: async (token: string) => await getSavedPlaylists(token),
+};
+
+async function getCurrentUser(
+	access_token: string
+): Promise<string | undefined> {
+	return await fetch(USER_URL, {
+		headers: {
+			Authorization: `Bearer ${access_token}`,
+		},
+	})
+		.then(async (res) => {
+			if (!res.ok) {
+				throw new Error('Could not get user information');
+			}
+			const data = await res.json();
+			return data['uri'] ? (data['uri'] as string) : undefined;
+		})
+		.catch(() => {
+			return undefined;
+		});
+}
+
+export async function getSavedPlaylists(access_token: string) {
 	// logger.startMessage("Downloading user's saved playlists", index);
-	const playlistsCountURL = getURL(PLAYLISTS_URL, 0, 1);
+	const playlistsCountURL = getURL(getPlaylistsOptions.url, 0, 1);
 	return await fetch(playlistsCountURL, {
 		headers: {
 			Authorization: `Bearer ${access_token}`,
@@ -21,18 +55,25 @@ export async function getSavedPlaylists(access_token: string, index: number) {
 	})
 		.then(async (res) => {
 			if (!res.ok) {
-				throw new Error('Error in saved playlists');
+				throw new Error(
+					`Error getting the total count for ${getPlaylistsOptions.name.toLowerCase()}`
+				);
 			}
 			const data = await res.json();
 			const totalPlaylists = data['total'] as number;
 			playlistBar = statusBars.createSingleBar(
-				'Saved playlists',
+				getPlaylistsOptions.name,
 				totalPlaylists,
 				0
 			);
+			const user = await getCurrentUser(access_token);
+			if (!user) {
+				return;
+			}
 			const allPlaylists = await getAllPlaylists(
 				0,
 				totalPlaylists,
+				user,
 				access_token
 			);
 			const schemedPlaylists = [];
@@ -51,32 +92,46 @@ export async function getSavedPlaylists(access_token: string, index: number) {
 					uri: playlist['uri'],
 				});
 			}
-			const userID = 'spotify:user:22zdpbeul4bbyji6mkaae3hci';
-			for (const playlist of schemedPlaylists) {
-				if (playlist['owner'] === userID) {
-					const totalTracks = playlist['totalTracks'] as number;
-					playlistTrackBar = statusBars.createSingleBar(
-						'Get playlist tracks',
-						totalTracks,
-						0
-					);
-					const allTracks = await getAllPlaylistTracks(
-						playlist['id'] as string,
-						0,
-						totalTracks,
-						access_token
-					);
-					playlist['tracks'] = allTracks;
-					if (allTracks.length === totalTracks) {
-						await statusBars.stop(playlistTrackBar);
-					} else {
-						await statusBars.stopWithError(playlistTrackBar);
-					}
-					playlistTrackBar = null;
+			const followedPlaylists = schemedPlaylists.filter((playlist) => {
+				playlist.owner !== user;
+			});
+			await writeFile(
+				'data/followedPlaylists.json',
+				JSON.stringify(followedPlaylists, null, 4),
+				'utf-8'
+			);
+			const myPlaylists = schemedPlaylists.filter(
+				(playlist) => playlist.owner === user
+			);
+			updateTotalStatusBar(myPlaylists.length);
+			for (const playlist of myPlaylists) {
+				if (playlist['owner'] !== user) {
+					continue;
 				}
+				const totalTracks = playlist['totalTracks'] as number;
+				playlistTrackBar = statusBars.createSingleBar(
+					'Get playlist tracks',
+					totalTracks,
+					0
+				);
+				const allTracks = await getAllPlaylistTracks(
+					playlist['id'] as string,
+					0,
+					totalTracks,
+					access_token
+				);
+				playlist['tracks'] = allTracks;
+				if (allTracks.length === totalTracks) {
+					await statusBars.stop(playlistTrackBar);
+					updateProgessTotalbar();
+					statusBars.step(playlistBar, 1);
+				} else {
+					await statusBars.stopWithError(playlistTrackBar);
+				}
+				playlistTrackBar = null;
 			}
 			await writeFile(
-				'data/savedPlaylists.json',
+				`${getPlaylistsOptions.save_file}.json`,
 				JSON.stringify(schemedPlaylists, null, 4),
 				'utf-8'
 			);
@@ -97,6 +152,7 @@ export async function getSavedPlaylists(access_token: string, index: number) {
 async function getAllPlaylists(
 	start: number,
 	totalPlaylists: number,
+	user: string,
 	access_token: string
 ): Promise<any[]> {
 	if (start > totalPlaylists) return [];
@@ -108,19 +164,21 @@ async function getAllPlaylists(
 	})
 		.then(async (res): Promise<any[]> => {
 			if (!res.ok) {
-				throw new Error(
-					`Could not get information for playlists with offset ${start}`
-				);
+				throw new Error(`${getPlaylistsOptions.offset_error_message} ${start}`);
 			}
 			const data = await res.json();
 			const items = data['items'] as any[];
-			await statusBars.step(playlistBar, items.length);
+			const followedPlaylists = items.filter(
+				(playlist) => (playlist?.owner?.uri ?? '') !== user
+			);
+			await statusBars.step(playlistBar, followedPlaylists.length);
 
 			return [
 				...items,
 				...(await getAllPlaylists(
 					start + DEFAULT_OFFSET,
 					totalPlaylists,
+					user,
 					access_token
 				)),
 			];

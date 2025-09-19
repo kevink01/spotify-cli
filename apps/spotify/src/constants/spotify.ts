@@ -1,5 +1,5 @@
 const BASE_URL = 'https://api.spotify.com/v1';
-const USER_URL = `${BASE_URL}/me`;
+export const USER_URL = `${BASE_URL}/me`;
 
 export const ALBUMS_URL = `${USER_URL}/albums`;
 export const AUDIOBOOKS_URL = `${USER_URL}/audiobooks`;

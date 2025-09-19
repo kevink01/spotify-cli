@@ -38,20 +38,6 @@ app.use(async (c, next) => {
 	}
 });
 app.route('/code', codeRouter);
-app.get('/exit', async (c) => {
-	if (server) {
-		server.close();
-		const interval = setInterval(() => {
-			console.log(requestCount);
-			if (requestCount === 0) {
-				clearInterval(interval);
-				console.log('hello');
-				process.exit(0);
-			}
-		}, 1000);
-	}
-	return c.json(null, HttpStatusCodes.ACCEPTED);
-});
 
 app.get(
 	'/ws',
@@ -85,3 +71,11 @@ const server = serve(
 	}
 );
 injectWebSocket(server);
+app.get('/exit', async (c) => {
+	console.log('Received shutdown request. Terminating the server...');
+	server.close(() => {
+		console.log('Server gracefully closed.');
+		process.exit(0);
+	});
+	return c.text('Server is shutting down.');
+});

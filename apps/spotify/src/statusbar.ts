@@ -20,10 +20,9 @@ const customFormatter: GenericFormatter = (
 		progress,
 		options.barsize ?? 40
 	);
-	const percentage = `${(params.progress * 100).toFixed(2)}%`.padStart(7);
+	const percentage = `${(params.progress * 100).toFixed(0)}%`.padStart(4);
 	const totalStr = `${params.value}/${params.total}`.padStart(10);
-	const etaStr = `${isNaN(params.eta) ? 0 : params.eta}`.padStart(3);
-	return `${chalk.green(completeBar + '' + incompleteBar)} | ${payload.name} | ${percentage} | ETA: ${etaStr}s | ${totalStr} | ${payload.status}`;
+	return `${chalk.green(completeBar + '' + incompleteBar)} | ${payload.name} | ${totalStr} (${percentage}) | ${payload.status}`;
 };
 
 const customPreset: Preset = {
@@ -55,6 +54,13 @@ export class StatusBar {
 		this.assertStatusBarIsNotNull(bar);
 		await this.asyncProgress(() => {
 			bar.increment(step);
+		});
+	}
+
+	async updateTotal(bar: SingleBar | null, progress: number) {
+		this.assertStatusBarIsNotNull(bar);
+		await this.asyncProgress(() => {
+			bar.setTotal(bar.getTotal() + progress);
 		});
 	}
 
